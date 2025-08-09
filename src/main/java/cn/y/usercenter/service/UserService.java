@@ -1,6 +1,6 @@
 package cn.y.usercenter.service;
 
-import cn.y.usercenter.model.User;
+import cn.y.usercenter.model.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.servlet.http.HttpServletRequest;

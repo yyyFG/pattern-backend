@@ -1,6 +1,6 @@
 package cn.y.usercenter.service;
 
-import cn.y.usercenter.model.Tag;
+import cn.y.usercenter.model.domain.Tag;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

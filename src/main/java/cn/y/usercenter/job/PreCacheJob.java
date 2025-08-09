@@ -1,9 +1,7 @@
 package cn.y.usercenter.job;
 
-import cn.y.usercenter.mapper.UserMapper;
-import cn.y.usercenter.model.User;
+import cn.y.usercenter.model.domain.User;
 import cn.y.usercenter.service.UserService;
-import cn.y.usercenter.utils.ResultUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +16,6 @@ import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static cn.y.usercenter.constant.UserConstant.REDIS_RECOMMEND_KEY;
 
 /**
  * 缓存预热任务

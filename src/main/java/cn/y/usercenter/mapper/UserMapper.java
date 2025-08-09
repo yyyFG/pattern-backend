@@ -1,6 +1,6 @@
 package cn.y.usercenter.mapper;
 
-import cn.y.usercenter.model.User;
+import cn.y.usercenter.model.domain.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

@@ -1,16 +1,6 @@
 package cn.y.usercenter.service;
 
-import cn.y.usercenter.mapper.UserMapper;
-import cn.y.usercenter.model.User;
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.util.StopWatch;
-
-import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.*;
 
 @SpringBootTest
 public class InsertUserTest {

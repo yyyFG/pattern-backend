@@ -1,6 +1,6 @@
 package cn.y.usercenter.service.impl;
 
-import cn.y.usercenter.model.Tag;
+import cn.y.usercenter.model.domain.Tag;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import cn.y.usercenter.service.TagService;
 import cn.y.usercenter.mapper.TagMapper;

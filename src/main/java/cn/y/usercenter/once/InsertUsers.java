@@ -2,8 +2,7 @@ package cn.y.usercenter.once;
 
 
 import cn.y.usercenter.mapper.UserMapper;
-import cn.y.usercenter.model.User;
-import org.springframework.scheduling.annotation.Scheduled;
+import cn.y.usercenter.model.domain.User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 

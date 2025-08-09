@@ -1,14 +1,6 @@
 package cn.y.usercenter.service;
 
-import cn.y.usercenter.model.User;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-
-import javax.annotation.Resource;
 
 @SpringBootTest
 public class RedisTest {

@@ -1,4 +1,4 @@
-package cn.y.usercenter.model;
+package cn.y.usercenter.model.domain;
 
 
 import com.baomidou.mybatisplus.annotation.*;

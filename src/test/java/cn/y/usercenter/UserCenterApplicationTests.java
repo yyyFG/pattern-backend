@@ -1,18 +1,6 @@
 package cn.y.usercenter;
 
-import cn.y.usercenter.mapper.UserMapper;
-import cn.y.usercenter.model.User;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.util.DigestUtils;
-
-import javax.annotation.Resource;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
 
 @SpringBootTest
 class UserCenterApplicationTests {
