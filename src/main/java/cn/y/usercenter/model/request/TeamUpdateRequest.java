@@ -1,20 +1,19 @@
 package cn.y.usercenter.model.request;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 添加队伍请求体
+ * 修改队伍请求体
  */
 @Data
-public class TeamAddRequest implements Serializable {
+public class TeamUpdateRequest implements Serializable {
 
-    private static final long serialVersionUID = -5209895058999835579L;
+
+    private static final long serialVersionUID = 4905685127761792795L;
+
 
     /**
      * id
@@ -31,20 +30,11 @@ public class TeamAddRequest implements Serializable {
      */
     private String description;
 
-    /**
-     * 最大人数
-     */
-    private Integer maxNum;
 
     /**
      * 过期时间
      */
     private Date expireTime;
-
-    /**
-     * 创建人 id
-     */
-    private Long userId;
 
     /**
      * 队伍状态  0 - 公开， 1- 私有， 2 - 加密
@@ -55,5 +45,4 @@ public class TeamAddRequest implements Serializable {
      * 密码
      */
     private String teamPassword;
-
 }

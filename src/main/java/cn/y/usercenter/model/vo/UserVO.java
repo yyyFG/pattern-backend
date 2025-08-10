@@ -1,22 +1,25 @@
-package cn.y.usercenter.model.domain;
+package cn.y.usercenter.model.vo;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
- * 用户表
- * @TableName user
+ * 用户包装类（脱敏）
  */
-@TableName(value ="user")
 @Data
-public class User implements Serializable {
+public class UserVO implements Serializable {
+
+
+    private static final long serialVersionUID = 3364798468488671974L;
     /**
      * id
      */
-    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
@@ -45,11 +48,6 @@ public class User implements Serializable {
     private String profile;
 
     /**
-     * 密码
-     */
-    private String userPassword;
-
-    /**
      * 电话
      */
     private String phone;
@@ -70,22 +68,6 @@ public class User implements Serializable {
     private Integer userRole;
 
     /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
-
-    /**
-     * 是否删除
-     */
-    @TableLogic
-    private Integer isDelete;
-
-    /**
      * 星球用户
      */
     private String planetCode;
@@ -95,6 +77,15 @@ public class User implements Serializable {
      */
     private String tags;
 
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    /**
+     * 更新时间
+     */
+    private Date updateTime;
+
+
 }

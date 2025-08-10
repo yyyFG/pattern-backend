@@ -7,6 +7,9 @@ import cn.y.usercenter.model.domain.Team;
 import cn.y.usercenter.model.domain.User;
 import cn.y.usercenter.model.dto.TeamQuery;
 import cn.y.usercenter.model.request.TeamAddRequest;
+import cn.y.usercenter.model.request.TeamJoinRequest;
+import cn.y.usercenter.model.request.TeamUpdateRequest;
+import cn.y.usercenter.model.vo.TeamUserVO;
 import cn.y.usercenter.service.TeamService;
 import cn.y.usercenter.service.UserService;
 import cn.y.usercenter.utils.ResultUtils;
@@ -42,7 +45,7 @@ public class TeamController {
         if(teamAddRequest == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
         Team team = new Team();
         try {
-            BeanUtils.copyProperties(team, teamAddRequest);
+            BeanUtils.copyProperties(teamAddRequest, team);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -65,13 +68,15 @@ public class TeamController {
     }
 
     @PostMapping("/update")
-    public BaseResponse<Long> updateTeam(@RequestBody Team team, HttpServletRequest request){
-        if(team == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        boolean result = teamService.updateById(team);
+    public BaseResponse<Boolean> updateTeam(@RequestBody TeamUpdateRequest teamUpdateRequest, HttpServletRequest request){
+        if(teamUpdateRequest == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
+
+        User loginUser = userService.getLoginUser(request);
+        boolean result = teamService.updateTeam(teamUpdateRequest, loginUser);
 
         if(!result) throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新失败");
 
-        return ResultUtils.success(team.getId());
+        return ResultUtils.success(true);
     }
 
     @GetMapping("/search")
@@ -85,19 +90,31 @@ public class TeamController {
         return ResultUtils.success(team);
     }
 
+//    @GetMapping("/list")
+//    public BaseResponse<List<Team>> listTeams(TeamQuery teamQuery){
+//        if(teamQuery == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
+//
+//        Team team = new Team();
+//        try {
+//            BeanUtils.copyProperties(team,teamQuery);
+//        } catch (Exception e) {
+//            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+//        }
+//
+//        QueryWrapper<Team> queryWrapper = new QueryWrapper<>(team);
+//        List<Team> teamList = teamService.list(queryWrapper);
+//
+//        return ResultUtils.success(teamList);
+//    }
+
     @GetMapping("/list")
-    public BaseResponse<List<Team>> listTeams(TeamQuery teamQuery){
+    public BaseResponse<List<TeamUserVO>> listTeams(TeamQuery teamQuery, HttpServletRequest request) throws InvocationTargetException, IllegalAccessException {
         if(teamQuery == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
 
-        Team team = new Team();
-        try {
-            BeanUtils.copyProperties(team,teamQuery);
-        } catch (Exception e) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
-        }
+        User loginUser = userService.getLoginUser(request);
+        boolean isAdmin = userService.isAdmin(loginUser);
 
-        QueryWrapper<Team> queryWrapper = new QueryWrapper<>(team);
-        List<Team> teamList = teamService.list(queryWrapper);
+        List<TeamUserVO> teamList = teamService.listTeams(teamQuery, isAdmin);
 
         return ResultUtils.success(teamList);
     }
@@ -109,7 +126,7 @@ public class TeamController {
 
         Team team = new Team();
         try {
-            BeanUtils.copyProperties(team,teamQuery);
+            BeanUtils.copyProperties(teamQuery,team);
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
@@ -119,5 +136,18 @@ public class TeamController {
         Page<Team> resultPage = teamService.page(teamPage, queryWrapper);
 
         return ResultUtils.success(resultPage);
+    }
+
+    @PostMapping("/join")
+    public BaseResponse<Boolean> joinTeam(@RequestBody TeamJoinRequest teamJoinRequest, HttpServletRequest request) throws InvocationTargetException, IllegalAccessException {
+        if(teamJoinRequest == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+        User loginUser = userService.getLoginUser(request);
+
+        boolean result = teamService.joinTeam(teamJoinRequest, loginUser);
+
+        return ResultUtils.success(result);
     }
 }

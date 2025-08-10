@@ -2,7 +2,15 @@ package cn.y.usercenter.service;
 
 import cn.y.usercenter.model.domain.Team;
 import cn.y.usercenter.model.domain.User;
+import cn.y.usercenter.model.dto.TeamQuery;
+import cn.y.usercenter.model.request.TeamJoinRequest;
+import cn.y.usercenter.model.request.TeamUpdateRequest;
+import cn.y.usercenter.model.vo.TeamUserVO;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 /**
 * @author Youngman
@@ -19,4 +27,24 @@ public interface TeamService extends IService<Team> {
      * @return
      */
     long addTeam(Team team, User loginUser);
+
+    /**
+     * 队伍列表查询
+     * @param teamQuery
+     * @return
+     */
+    List<TeamUserVO> listTeams(TeamQuery teamQuery, boolean isAdmin) throws InvocationTargetException, IllegalAccessException;
+
+    /**
+     * 队伍更新
+     * @param teamUpdateRequest
+     * @return
+     */
+    boolean updateTeam(TeamUpdateRequest teamUpdateRequest, User loginUser);
+
+    /**
+     * 加入队伍
+     * @param teamJoinRequest
+     */
+    boolean joinTeam(TeamJoinRequest teamJoinRequest, User loginUser) throws InvocationTargetException, IllegalAccessException;
 }
