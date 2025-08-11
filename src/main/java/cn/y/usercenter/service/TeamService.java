@@ -4,6 +4,7 @@ import cn.y.usercenter.model.domain.Team;
 import cn.y.usercenter.model.domain.User;
 import cn.y.usercenter.model.dto.TeamQuery;
 import cn.y.usercenter.model.request.TeamJoinRequest;
+import cn.y.usercenter.model.request.TeamQuitRequest;
 import cn.y.usercenter.model.request.TeamUpdateRequest;
 import cn.y.usercenter.model.vo.TeamUserVO;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -47,4 +48,20 @@ public interface TeamService extends IService<Team> {
      * @param teamJoinRequest
      */
     boolean joinTeam(TeamJoinRequest teamJoinRequest, User loginUser) throws InvocationTargetException, IllegalAccessException;
+
+    /**
+     * 退出队伍
+     * @param teamQuitRequest
+     * @param loginUser
+     * @return
+     */
+    boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser);
+
+    /**
+     * 解散队伍
+     * @param teamId
+     * @param loginUser
+     * @return
+     */
+    boolean dissolveTeam(long teamId, User loginUser);
 }

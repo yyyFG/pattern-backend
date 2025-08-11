@@ -3,13 +3,12 @@ package cn.y.usercenter.model.request;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
- * 加入队伍请求体
+ * 退出队伍请求体
  */
 @Data
-public class TeamJoinRequest implements Serializable {
+public class TeamQuitRequest implements Serializable {
 
 
     private static final long serialVersionUID = 4905685127761792795L;
@@ -20,8 +19,5 @@ public class TeamJoinRequest implements Serializable {
      */
     private Long teamId;
 
-    /**
-     * 密码
-     */
-    private String teamPassword;
+
 }

@@ -8,6 +8,7 @@ import cn.y.usercenter.model.domain.User;
 import cn.y.usercenter.model.dto.TeamQuery;
 import cn.y.usercenter.model.request.TeamAddRequest;
 import cn.y.usercenter.model.request.TeamJoinRequest;
+import cn.y.usercenter.model.request.TeamQuitRequest;
 import cn.y.usercenter.model.request.TeamUpdateRequest;
 import cn.y.usercenter.model.vo.TeamUserVO;
 import cn.y.usercenter.service.TeamService;
@@ -149,5 +150,31 @@ public class TeamController {
         boolean result = teamService.joinTeam(teamJoinRequest, loginUser);
 
         return ResultUtils.success(result);
+    }
+
+    @PostMapping("/quit")
+    public BaseResponse<Boolean> quitTeam(@RequestBody TeamQuitRequest teamQuitRequest, HttpServletRequest request){
+        if(teamQuitRequest == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+        User loginUser = userService.getLoginUser(request);
+
+        boolean result = teamService.quitTeam(teamQuitRequest, loginUser);
+
+        return ResultUtils.success(result);
+    }
+
+    @PostMapping("/dissolveTeam")
+    public BaseResponse<Boolean> dissolveTeam(@RequestBody long teamId, HttpServletRequest request){
+        if(teamId <= 0) throw new BusinessException(ErrorCode.PARAMS_ERROR);
+
+        User loginUser = userService.getLoginUser(request);
+
+        boolean result = teamService.dissolveTeam(teamId, loginUser);
+
+        if(!result) throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除失败");
+
+        return ResultUtils.success(true);
     }
 }
