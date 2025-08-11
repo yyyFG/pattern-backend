@@ -358,9 +358,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             if(team.getUserId().equals(userId)){
                 // 把队伍转移给第二个人
                 QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
-                queryWrapper.eq("teamId", teamId);
+                userTeamQueryWrapper.eq("teamId", teamId);
 //                queryWrapper.orderByAsc("id");
-                queryWrapper.last("order by id asc limit 2");
+                userTeamQueryWrapper.last("order by id asc limit 2");
                 List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
                 if(CollectionUtils.isEmpty(userTeamList) || userTeamList.size() <= 1){
                     throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -375,7 +375,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
                     throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新队伍失败");
                 }
 
-                boolean b2 = userTeamService.removeById(userId);
+                boolean b2 = userTeamService.remove(queryWrapper);
                 if(!b2){
                     throw new BusinessException(ErrorCode.SYSTEM_ERROR, "退出队伍失败");
                 }
