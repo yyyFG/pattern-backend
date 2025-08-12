@@ -46,7 +46,7 @@ public class TeamController {
         if(teamAddRequest == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
         Team team = new Team();
         try {
-            BeanUtils.copyProperties(teamAddRequest, team);
+            BeanUtils.copyProperties(team, teamAddRequest);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -127,7 +127,7 @@ public class TeamController {
 
         Team team = new Team();
         try {
-            BeanUtils.copyProperties(teamQuery,team);
+            BeanUtils.copyProperties(team,teamQuery);
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
