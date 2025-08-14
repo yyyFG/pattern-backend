@@ -1,5 +1,6 @@
 package cn.y.usercenter.service.impl;
 
+import cn.y.usercenter.common.BaseResponse;
 import cn.y.usercenter.common.ErrorCode;
 import cn.y.usercenter.exception.BusinessException;
 import cn.y.usercenter.mapper.UserTeamMapper;
@@ -15,6 +16,7 @@ import cn.y.usercenter.model.vo.TeamUserVO;
 import cn.y.usercenter.model.vo.UserVO;
 import cn.y.usercenter.service.UserService;
 import cn.y.usercenter.service.UserTeamService;
+import cn.y.usercenter.utils.ResultUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import cn.y.usercenter.service.TeamService;
@@ -25,14 +27,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
 * @author Youngman
@@ -50,6 +52,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
     @Resource
     private UserService userService;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -136,6 +139,11 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             if(id != null && id > 0){
                 queryWrapper.eq("id", id);
             }
+            List<Long> idList = teamQuery.getIdList();
+            if(CollectionUtils.isNotEmpty(idList)){
+                queryWrapper.in("id", idList);
+            }
+
             String searchText = teamQuery.getSearchText();
             if(StringUtils.isNotBlank(searchText)){
                 queryWrapper.and(qw -> qw.like("name", searchText)
@@ -446,6 +454,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
         return team;
     }
+
 }
 
 

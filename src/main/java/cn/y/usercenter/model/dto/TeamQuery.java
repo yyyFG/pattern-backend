@@ -1,13 +1,10 @@
 package cn.y.usercenter.model.dto;
 
-import cn.y.usercenter.model.request.PageRequest;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import cn.y.usercenter.common.PageRequest;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -22,6 +19,12 @@ public class TeamQuery extends PageRequest implements Serializable {
      * id
      */
     private Long id;
+
+
+    /**
+     * id 列表
+     */
+    private List<Long> idList;
 
     /**
      * 搜索关键词（同时对队伍名称和描述搜索）

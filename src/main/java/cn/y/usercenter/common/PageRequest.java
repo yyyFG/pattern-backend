@@ -1,4 +1,4 @@
-package cn.y.usercenter.model.request;
+package cn.y.usercenter.common;
 
 import lombok.Data;
 
