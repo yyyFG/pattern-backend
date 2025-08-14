@@ -129,14 +129,17 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     public List<TeamUserVO> listTeams(TeamQuery teamQuery, boolean isAdmin) throws InvocationTargetException, IllegalAccessException {
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         // 组合查询条件
-        if(teamQuery != null){
+
+//        System.out.println(teamQuery);
+        if(teamQuery != null && !teamQuery.equals(new TeamQuery())){
             Long id = teamQuery.getId();
             if(id != null && id > 0){
                 queryWrapper.eq("id", id);
             }
             String searchText = teamQuery.getSearchText();
             if(StringUtils.isNotBlank(searchText)){
-                queryWrapper.and(qw -> qw.like("name", searchText).or().like("description", searchText));
+                queryWrapper.and(qw -> qw.like("name", searchText)
+                        .or().like("description", searchText));
             }
 
             String name = teamQuery.getName();
@@ -160,15 +163,16 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             // 根据状态来查询
             Integer status = teamQuery.getStatus();
             TeamEnumStatus teamEnumStatus = TeamEnumStatus.getEnumByValue(status);
-            if(teamEnumStatus == null){
-                teamEnumStatus = TeamEnumStatus.PUBLIC;
+            if(teamEnumStatus != null){
+//                teamEnumStatus = TeamEnumStatus.PUBLIC;
+                queryWrapper.eq("status", teamEnumStatus.getValue());
             }
             // 只有管理员才能查看加密还有不公开的队伍
             if(!isAdmin && !teamEnumStatus.equals(TeamEnumStatus.PUBLIC)){
                 throw new BusinessException(ErrorCode.NO_AUTH);
             }
 
-            queryWrapper.eq("status", teamEnumStatus.getValue());
+//            queryWrapper.eq("status", teamEnumStatus.getValue());
         }
         // 不展示已过期的队伍
         // expireTime is not null and expireTime < now()
