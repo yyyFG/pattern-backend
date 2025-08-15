@@ -31,6 +31,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -126,6 +127,21 @@ public class TeamController {
 
         List<TeamUserVO> teamList = teamService.listTeams(teamQuery, isAdmin);
 
+        List<Long> teamIdList = teamList.stream().map(TeamUserVO::getId).collect(Collectors.toList());
+        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+        try {
+            userTeamQueryWrapper.eq("userId", loginUser.getId());
+            userTeamQueryWrapper.eq("teamId", teamIdList);
+            List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
+            // 已加入队伍的 id 集合
+            Set<Long> hasJoinTeamIdSet = userTeamList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
+            teamList.forEach(team -> {
+                boolean hasJoin = hasJoinTeamIdSet.contains(team.getId());
+                team.setHasJoin(hasJoin);
+            });
+
+        }catch (Exception e){}
+
         return ResultUtils.success(teamList);
     }
 
@@ -185,6 +201,7 @@ public class TeamController {
     }
 
 
+    //todo 查询分页
     @GetMapping("/list/page")
     public BaseResponse<Page<Team>> listTeamsByPage(TeamQuery teamQuery){
         if(teamQuery == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
