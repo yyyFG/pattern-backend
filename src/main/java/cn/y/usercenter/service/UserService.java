@@ -1,6 +1,7 @@
 package cn.y.usercenter.service;
 
 import cn.y.usercenter.model.domain.User;
+import cn.y.usercenter.model.vo.UserVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -71,4 +72,27 @@ public interface UserService extends IService<User> {
      * @return
      */
     boolean isAdmin(User loginUser);
+
+    /**
+     * 获取最匹配用户
+     * @param num
+     * @param loginUser
+     */
+    List<User> matchUsers(long num, User loginUser);
+
+    /**
+     * 优化--获取最匹配用户
+     * @param num
+     * @param loginUser
+     * @return
+     */
+    List<User> matchUsersOptim(long num, User loginUser);
+
+    /**
+     * 优先队列--获取最匹配用户
+     * @param num
+     * @param loginUser
+     * @return
+     */
+    List<User> matchUsersOptimPrio(long num, User loginUser);
 }

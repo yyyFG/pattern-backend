@@ -2,6 +2,8 @@ package cn.y.usercenter.service.impl;
 
 import cn.y.usercenter.common.ErrorCode;
 import cn.y.usercenter.exception.BusinessException;
+import cn.y.usercenter.model.vo.UserVO;
+import cn.y.usercenter.utils.AlgorithmUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import cn.y.usercenter.model.domain.User;
@@ -11,6 +13,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
@@ -18,13 +21,11 @@ import org.springframework.util.DigestUtils;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static cn.y.usercenter.constant.UserConstant.ADMIN_ROLE;
 import static cn.y.usercenter.constant.UserConstant.USER_LOGIN_STATE;
@@ -296,6 +297,210 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return loginUser != null && loginUser.getUserRole() == ADMIN_ROLE;
     }
 
+    /**
+     * 获取最匹配用户
+     * @param num
+     * @param loginUser
+     * @return
+     */
+    @Override
+    public List<User> matchUsers(long num, User loginUser) {
+        List<User> userList = this.list();
+        String userTags = loginUser.getTags();
+        Gson gson = new Gson();
+        List<String> tagList = gson.fromJson(userTags, new TypeToken<List<String>>() {
+        }.getType());
+
+        // 用户列表的下表 =》相似度
+        SortedMap<Integer, Long> indexDistanceMap = new TreeMap<>();
+        for (int i = 0; i < tagList.size(); i++) {
+            User user = userList.get(i);
+            String tags = user.getTags();
+            // 无标签
+            if(StringUtils.isBlank(tags)){
+                continue;
+            }
+            List<String> userTagsList = gson.fromJson(tags, new TypeToken<List<String>>() {
+            }.getType());
+            // 计算分数
+            long distance = AlgorithmUtils.minDistance(tagList, userTagsList);
+            indexDistanceMap.put(i, distance);
+        }
+        List<Integer> maxDistanceIndexList = indexDistanceMap.keySet().stream().limit(num).collect(Collectors.toList());
+        List<User> userVOList = maxDistanceIndexList.stream()
+                .map(index -> getSafetyUser(userList.get(index)))
+                .collect(Collectors.toList());
+
+        return userVOList;
+    }
+
+    /**
+     * 获取最匹配用户
+     * @param num
+     * @param loginUser
+     * @return
+     */
+    @Override
+    public List<User> matchUsersOptim(long num, User loginUser) {
+
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNotNull("tags");
+        queryWrapper.select("id","tags");
+        List<User> userList = this.list(queryWrapper);
+
+        String userTags = loginUser.getTags();
+        Gson gson = new Gson();
+        List<String> tagList = gson.fromJson(userTags, new TypeToken<List<String>>() {
+        }.getType());
+
+        // 用户列表的下表 =》相似度
+        List<Pair<User, Long>> list = new ArrayList<>();
+        // 依次计算当前用户和所有用户的相似度
+        for (int i = 0; i < userList.size(); i++) {
+            User user = userList.get(i);
+            String tags = user.getTags();
+            // 无标签 或 当前用户为自己
+            if(StringUtils.isBlank(tags) || Objects.equals(user.getId(), loginUser.getId())){
+                continue;
+            }
+            List<String> userTagsList = gson.fromJson(tags, new TypeToken<List<String>>() {
+            }.getType());
+            // 计算分数
+            long distance = AlgorithmUtils.minDistance(tagList, userTagsList);
+            list.add(new Pair<>(user, distance));
+        }
+        // 按编辑距离有小到大排序
+        List<Pair<User, Long>> topUserPairList = list.stream()
+                .sorted((a,b) -> (int)(a.getValue() - b.getValue()))
+                .limit(num)
+                .collect(Collectors.toList());
+
+        // 有顺序的 userId 列表
+        List<Long> userListVO = topUserPairList.stream()
+                .map(pari -> pari.getKey().getId()).collect(Collectors.toList());
+
+        // 根据 id 查询 user 完整信息
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.in("id", userListVO);
+        Map<Long, List<User>> userIdUserListMap = this.list(userQueryWrapper).stream()
+                .map(user -> getSafetyUser(user))
+                .collect(Collectors.groupingBy(User::getId));
+
+        // 因为上面查询打乱了顺序，这里根据上面有序的 userId 列表赋值
+        List<User> finalUserList = new ArrayList<>();
+        for(Long userId : userListVO){
+            finalUserList.add(userIdUserListMap.get(userId).get(0));
+        }
+
+//        return getFinalUsersBySql(userListVO);
+//        return getFinalUsersByMemory(userListVO);
+
+        return finalUserList;
+    }
+
+    /**
+     * 获取最匹配用户 -- 优先队列
+     * @param num
+     * @param loginUser
+     * @return
+     */
+    @Override
+    public List<User> matchUsersOptimPrio(long num, User loginUser) {
+
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNotNull("tags");
+        queryWrapper.select("id","tags");
+        List<User> userList = this.list(queryWrapper);
+
+        String userTags = loginUser.getTags();
+        Gson gson = new Gson();
+        List<String> tagList = gson.fromJson(userTags, new TypeToken<List<String>>() {
+        }.getType());
+
+        // 用户列表的下表 =》相似度
+        List<Pair<User, Long>> list = new ArrayList<>();
+        PriorityQueue priorityQueue = new PriorityQueue<>(Comparator.comparingLong(Pair::getValue));
+
+        // 依次计算当前用户和所有用户的相似度
+        for (int i = 0; i < userList.size(); i++) {
+            User user = userList.get(i);
+            String tags = user.getTags();
+            // 无标签 或 当前用户为自己
+            if(StringUtils.isBlank(tags) || Objects.equals(user.getId(), loginUser.getId())){
+                continue;
+            }
+            List<String> userTagsList = gson.fromJson(tags, new TypeToken<List<String>>() {
+            }.getType());
+            // 计算分数
+            long distance = AlgorithmUtils.minDistance(tagList, userTagsList);
+//            list.add(new Pair<>(user, distance));
+
+            if(priorityQueue.size() < num){
+                priorityQueue.add(new Pair<>(user, distance));
+            }else if(distance < priorityQueue.peek().getValue()){
+                priorityQueue.poll();
+                priorityQueue.add(new Pair<>(user, distance));
+            }
+        }
+
+        List userIdList = new ArrayList<>();
+        while (!priorityQueue.isEmpty()){
+            userIdList.add(priorityQueue.poll().getKey().getId());
+        }
+
+        // 根据 id 查询 user 完整信息
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.in("id", userIdList);
+        Map<Long, User> userIdUserMap = this.list(userQueryWrapper)
+                .stream()
+                .collect(Collectors.toMap(User::getId, this::getSafetyUser));
+
+        // 因为上面查询打乱了顺序，这里根据上面有序的 userId 列表赋值
+        List<User> finalUserList = new ArrayList<>();
+        for(Long userId : userIdList){
+            finalUserList.add(userIdUserMap.get(userId));
+        }
+
+//        return getFinalUsersBySql(userListVO);
+//        return getFinalUsersByMemory(userListVO);
+
+        return finalUserList;
+    }
+
+    /**
+     * 根据 id 顺序集合获取用户组（sql版）
+     * @param userListVO
+     * @return
+     */
+    private List<User> getFinalUsersBySql(List<Long> userListVO) {
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        // 使用 sql 拼接实现 list user in userListVO orderByField userListVO
+        userQueryWrapper.in("id", userListVO);
+        userQueryWrapper.last("order by field(id," + StringUtils.join(userListVO, ",") + ")");
+        return this.list(userQueryWrapper).stream().map(this::getSafetyUser).collect(Collectors.toList());
+    }
+
+    /**
+     * 根据 id 顺序集合获取用户组（内存版）
+     * @param userListVO
+     * @return
+     */
+    private List<User> getFinalUsersByMemory(List<Long> userListVO){
+        // 根据 id 查询user 完整信息
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.in("id", userListVO);
+        Map<Long, List<User>> userIdUserListMap = this.list(userQueryWrapper).stream()
+                .map(this::getSafetyUser)
+                .collect(Collectors.groupingBy(User::getId));
+
+        // 因为上面查询打乱了顺序，这里根据上面有序的 userID 列表赋值
+        List<User> finalUserList = new ArrayList<>();
+        for(Long userId : userListVO){
+            finalUserList.add(userIdUserListMap.get(userId).get(0));
+        }
+
+        return finalUserList;
+    }
 }
 
 

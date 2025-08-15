@@ -6,6 +6,7 @@ import cn.y.usercenter.exception.BusinessException;
 import cn.y.usercenter.model.domain.User;
 import cn.y.usercenter.model.request.UserLoginRequest;
 import cn.y.usercenter.model.request.UserRegisterRequest;
+import cn.y.usercenter.model.vo.UserVO;
 import cn.y.usercenter.service.UserService;
 import cn.y.usercenter.utils.ResultUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -148,6 +149,7 @@ public class UserController {
 
     }
 
+    //todo 用户匹配推荐
     @GetMapping("/recommend")
     public BaseResponse<Page<User>> usersRecommend(long pageSize, long pageNum, HttpServletRequest request){
         User loginUser = userService.getLoginUser(request);
@@ -179,8 +181,25 @@ public class UserController {
 
     }
 
+    /**
+     * 获取最匹配的用户
+     * @param request
+     * @return
+     */
+    @GetMapping("/match")
+    public BaseResponse<List<User>> matchUsers(long num, HttpServletRequest request){
+        if(num <= 0 || num > 20){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        List<User> users = userService.matchUsers(num, loginUser);
 
-    @PostMapping("/delete")
+        return ResultUtils.success(users);
+    }
+
+
+
+        @PostMapping("/delete")
     public BaseResponse<Boolean> userDelete(@RequestBody long id, HttpServletRequest request){
         if(!isAdmin(request)){
             throw new BusinessException(ErrorCode.NO_AUTH);
