@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://yyyai.xyz:3306/yustudy
-    username: root_yu
-    password: fuckmysql
+    url: jdbc:mysql://yyyai.xyz:3306/
+    username: 
+    password: 
   # session 失效时间
   session:
     timeout: 86400
